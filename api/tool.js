@@ -116,6 +116,7 @@ function getRange(min, max){
     const range = Math.abs(min-max)+1;
     return Math.floor(Math.random()*range+min);
 }
+// 访问器属性/数据属性 特性 [[attr]]
 let book = {
     _year: 2020,
     edition: 1,
@@ -132,6 +133,29 @@ Object.defineProperty(book, 'year', {
         }
     }
 })
-console.log(book.year);
-book.year = 2021;
-console.dir(book);
+
+// 组合式继承(构造函数+原型)
+function SuperType(name){
+    this.name = name;
+    this.friends = ['yancun'];
+}
+SuperType.prototype.sayFriends = function(){
+    console.log(this.friends.join('|'));
+}
+function SubType(name, age){
+    SuperType.call(this, name);
+    this.age = age;
+}
+SubType.prototype = new SuperType();
+SubType.prototype.constructor = SubType;
+SubType.prototype.sayAge = function(){
+    console.log(this.age);
+}
+// Object.create
+function Create(o,des){
+    F.prototype = o;
+    function F(){}
+    const f = new F();
+    Object.defineProperties(f, des);
+    return f;
+}
