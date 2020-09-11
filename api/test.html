@@ -14,19 +14,35 @@
     <input type="text" />
     <script src="./tool.js"></script>
     <script>
-        document.onscroll = throtte(handleScroll ,500);
+        // document.onscroll = throtte(handleScroll ,500);
+        // const input = document.querySelector('input');
+        // input.oninput = debounce((a, b) => {
+        //     console.log('input');
+        // }, 700)
+        // function handleScroll(a){
+        //     console.log(a);
+        // }
 
-
-
-        const input = document.querySelector('input');
-        input.oninput = debounce((a, b) => {
-            console.log('input');
-        }, 700)
-
-
-        function handleScroll(a){
-            console.log(a);
-        }
+        const p = new XY((resolve, reject) => {
+            setTimeout(_ => {
+                resolve('done');
+                console.log(123)
+            })
+            // console.log(abc);
+            // reject('error');
+        }).then(resolve => {
+            // console.log(abc);
+            // return '成功'
+            // console.log(resolve);
+            // setTimeout(_ => {
+            //     console.log(resolve);
+            // })
+        }, reject => {
+            // console.log(reject);
+            return abc;
+        })
+        
+        console.log('我是同步')
     </script>
 </body>
 </html>

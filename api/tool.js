@@ -159,3 +159,98 @@ function Create(o,des){
     Object.defineProperties(f, des);
     return f;
 }
+
+
+// Promise
+class XY{
+
+    // 内置的三种状态
+    static PENDING = 'PENDING';
+    static RESOLVE = 'RESOLVE';
+    static REJECT = 'REJECT';
+
+    constructor(excutor){
+        this.state = XY.PENDING;
+        this.value = null;
+        this.cbs = [];
+        try {
+            excutor(this.resolve, this.reject)
+        } catch (error) {
+            this.reject(error.message);
+        }
+    }
+
+    resolve = value => {
+        // 只有默认状态时才能改变
+        if(this.state === XY.PENDING){
+            this.state = XY.RESOLVE;
+            this.value = value;
+            setTimeout(_ => {
+                this.cbs.forEach(obj => obj.onResolved(value));
+            })   
+        } 
+    }
+
+    reject = reason => {
+        if(this.state === XY.PENDING){
+            this.state = XY.REJECT;
+            this.value = reason;
+            setTimeout(_ => {
+                this.cbs.forEach(obj => obj.onRejected(reason));
+            })
+        }
+    }
+
+    then = (onResolved, onRejected) => {
+        // 参数容错
+        onResolved = typeof onResolved === 'function' ? onResolved : _ => {};
+        onRejected = typeof onRejected === 'function' ? onRejected : _ => {};
+     
+        
+        // 新的promise状态和之前的promise是相互独立的
+        return new XY((resolve, reject) => {
+            // 状态改变异步
+            // onResolved/onRejected先暂时存起来
+            if(this.state === XY.PENDING){
+                this.cbs.push({
+                    onResolved: value => {
+                        try {
+                            resolve( onResolved(value) );
+                        } catch (error) {
+                            console.log(error)
+                            reject(error.message);
+                        }
+                    }, 
+                    onRejected: reason => {
+                        try {
+                            resolve( onRejected(reason) );
+                        } catch (error) {
+                            reject(error.message);
+                        }
+                    }
+                });
+            }
+            // 状态改变是同步
+            // 只有状态非默认时onResolved/onRejected才能执行
+            if(this.state === XY.RESOLVE){
+                // 保证异步执行
+                setTimeout( _ => {
+                    try {
+                        resolve( onResolved(this.value) );
+                    } catch (error) {
+                        reject(error.message);                
+                    }
+                })
+            }
+            if(this.state === XY.REJECT){
+                setTimeout(_ => {
+                    try {
+                        resolve( onRejected(this.value) );
+                    } catch (error) {
+                        reject(error.message);
+                    }
+                })
+            }
+        })
+    }
+}
